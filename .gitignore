@@ -1,0 +1,20 @@
+# Ignore build outputs
+bin/
+obj/
+
+# Ignore user-specific files
+.vs/
+.vscode/
+
+# Ignore packages
+packages/
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Ignore other files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
