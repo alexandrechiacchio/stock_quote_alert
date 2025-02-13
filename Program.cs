@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 
 public class QuoteMonitor
@@ -10,17 +11,22 @@ public class QuoteMonitor
     private string ticker;
     private double buy_quote;
     private double sell_quote;
-
+    private double cur_quote;
+    private double last_quote;
     private string token;
     public QuoteMonitor(string ticker, double buy_quote, double sell_quote)
     {
         this.ticker = ticker;
         this.buy_quote = buy_quote;
         this.sell_quote = sell_quote;
-        this.token = File.ReadAllText("apitoken");
+        this.token = File.ReadAllText("/home/chiacchio/inoa/ps/stock_quote_alert/apitoken"); // change this hardcode to something else later
+        SetQuoteAsync().Wait();
     }
-
-    public async Task<double?> GetQuoteAsync()
+    /// <summary>
+    ///  Set cur_quote to the current quote for the ticker
+    /// </summary>
+    /// <returns>Quote value</returns>
+    public async Task<double> SetQuoteAsync()
     {
         using (HttpClient client = new HttpClient())
         {
@@ -41,19 +47,20 @@ public class QuoteMonitor
 
             HttpResponseMessage response = await client.GetAsync(uriBuilder.Uri);
             string responseBody = await response.Content.ReadAsStringAsync();
-            try {
+            try
+            {
                 response.EnsureSuccessStatusCode();
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine($"Error: {e.Message} \n" + responseBody);
-                return null;
+                throw;
             }
 
             // Parse the JSON response
             double quote = JsonDocument.Parse(responseBody).RootElement.GetProperty("results")[0].GetProperty("regularMarketPrice").GetDouble();
 
-            return quote;
+            return cur_quote = quote;
         }
     }
 
@@ -62,10 +69,35 @@ public class QuoteMonitor
     // {
     //     // Send an email
     // }
-    // public static bool checkAlert(int n)
-    // {
-    //     // checks the interval
-    // }
+
+    public async Task CheckQuoteAsync()
+    {
+        if (cur_quote <= buy_quote && last_quote > buy_quote)
+        {
+            Console.WriteLine($"Buy {ticker} at {cur_quote}");
+            // sendEmail($"Buy {ticker} at {cur_quote}", $"Buy {ticker} at {cur_quote}");
+            return;
+        }
+        if (cur_quote >= sell_quote && last_quote < sell_quote)
+        {
+            Console.WriteLine($"Sell {ticker} at {cur_quote}");
+            // sendEmail($"Sell {ticker} at {quote}", $"Sell {ticker} at {quote}");
+            return;
+        }
+    }
+
+    public async Task Run()
+    {
+        while (true)
+        {
+            await SetQuoteAsync();
+            await CheckQuoteAsync();
+            last_quote = cur_quote;
+            Task.Delay(1728000).Wait(); // 172,8 seconds so I dont finish up the API limit
+            // the API is so bad that the free plan only updates every 30 minutes
+
+        }
+    }
 }
 
 class MainClass
@@ -92,7 +124,7 @@ class MainClass
         //     return 1;
         // }
 
-        string ticker = "PETR4";
+        string ticker = "PE4";
         double buy_quote = 20.0;
         double sell_quote = 25.0;
 
@@ -102,9 +134,12 @@ class MainClass
 
 
         QuoteMonitor quoteMonitor = new QuoteMonitor(ticker, buy_quote, sell_quote);
-        double quote = quoteMonitor.GetQuoteAsync().Result ?? throw new Exception("Failed to get quote");
-        Console.WriteLine($"Quote: {quote}");
+        double quote = quoteMonitor.SetQuoteAsync().Result;
+        Console.WriteLine($"Current quote of {ticker}: {quote}");
 
+        var monitorRunTask = quoteMonitor.Run();
+
+        Task.WhenAll(monitorRunTask).Wait(); // change this to A list later
 
         return 0;
     }
