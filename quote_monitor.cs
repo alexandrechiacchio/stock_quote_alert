@@ -78,13 +78,15 @@ namespace StockQuoteAlert
             if (cur_quote < buy_quote && last_quote > buy_quote)
             {
                 Console.WriteLine($"\nBuy {ticker} at {cur_quote}");
-                email.SendEmail($"Buy {ticker} at {cur_quote}", $"Buy rule for ticker {ticker} at buy quote {buy_quote} was triggered. Current quote is {cur_quote}");
+                Task.Run(() =>
+                    email.SendEmail($"Buy {ticker} at {cur_quote}", $"Buy rule for ticker {ticker} at buy quote {buy_quote} was triggered. Current quote is {cur_quote}"));
                 return;
             }
             if (cur_quote > sell_quote && last_quote < sell_quote)
             {
                 Console.WriteLine($"\nSell {ticker} at {cur_quote}");
-                email.SendEmail($"Sell {ticker} at {cur_quote}", $"Sell rule for ticker {ticker} at sell quote {sell_quote} was triggered. Current quote is {cur_quote}");
+                Task.Run(() =>
+                    email.SendEmail($"Sell {ticker} at {cur_quote}", $"Sell rule for ticker {ticker} at sell quote {sell_quote} was triggered. Current quote is {cur_quote}"));
                 return;
             }
         }

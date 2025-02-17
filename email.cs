@@ -31,31 +31,7 @@ namespace StockQuoteAlert
             config.GetSection("emailConfigs").Bind(_emailSettings);
         }
 
-        public void DebugSendEmail()
-        {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
-            message.To.Add(new MailboxAddress(_emailSettings.ToName, _emailSettings.ToEmail));
-            message.Subject = _emailSettings.Subject;
-
-            message.Body = new TextPart("plain")
-            {
-                Text = _emailSettings.Body
-            };
-
-            using (var client = new SmtpClient())
-            {
-
-                client.Connect(_emailSettings.SmtpConfigs["server"], int.Parse(_emailSettings.SmtpConfigs["port"]), true);
-
-                client.Authenticate(_emailSettings.SmtpConfigs["username"], _emailSettings.SmtpConfigs["password"]);
-
-                client.Send(message);
-                client.Disconnect(true);
-            }
-        }
-
-        public void SendEmail(string _subject, string _body)
+        public async Task SendEmail(string _subject, string _body)
         {
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
@@ -71,12 +47,12 @@ namespace StockQuoteAlert
             {
                 try
                 {
-                    client.Connect(_emailSettings.SmtpConfigs["server"], int.Parse(_emailSettings.SmtpConfigs["port"]), true);
+                    await client.ConnectAsync(_emailSettings.SmtpConfigs["server"], int.Parse(_emailSettings.SmtpConfigs["port"]), true);
 
-                    client.Authenticate(_emailSettings.SmtpConfigs["username"], _emailSettings.SmtpConfigs["password"]);
+                    await client.AuthenticateAsync(_emailSettings.SmtpConfigs["username"], _emailSettings.SmtpConfigs["password"]);
 
-                    client.Send(message);
-                    client.Disconnect(true);
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
                 }
                 catch (Exception e)
                 {
