@@ -1,50 +1,51 @@
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
-using email;
-class MainClass
+namespace StockQuoteAlert
 {
-    static int Main(string[] args)
+    class MainClass
     {
-        // if (args.Length < 3)
-        // {
-        //     Console.WriteLine("Please enter a ticker and an interval.");
-        //     Console.WriteLine("Usage: stock_quote_alert.exe <ticker> <buy_quote> <sell_quote> ");
-        //     return 1;
-        // }
+        static async Task<int> Main(string[] args)
+        {
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Please enter a ticker and an interval.");
+                Console.WriteLine("Usage: stock_quote_alert.exe <ticker> <buyQuote> <sellQuote> ");
+                return 1;
+            }
 
-        // string ticker = args[0];
-        // double buy_quote, sell_quote;
-        // if (!double.TryParse(args[1], out buy_quote) ||  !double.TryParse(args[2], out sell_quote) )
-        // {
-        //     Console.WriteLine("Please enter a valid numeric value for the quotes.");
-        //     return 1;
-        // }
-        // if(buy_quote < 0 || sell_quote < buy_quote)
-        // {
-        //     Console.WriteLine("Please enter a valid value for the quotes. Buy quote should be greater than 0 and sell quote should be greater than buy quote.");
-        //     return 1;
-        // }
+            string ticker = args[0];
+            double buyQuote, sellQuote;
+            if (!double.TryParse(args[1], out buyQuote) ||  !double.TryParse(args[2], out sellQuote) )
+            {
+                Console.WriteLine("Please enter a valid numeric value for the quotes.");
+                return 1;
+            }
+            if(buyQuote < 0 || sellQuote < buyQuote)
+            {
+                Console.WriteLine("Please enter a valid value for the quotes. Buy quote should be greater than 0 and sell quote should be greater than buy quote.");
+                return 1;
+            }
 
-        // string ticker = "PETR4";
-        // double buy_quote = 20.0;
-        // double sell_quote = 25.0;
+            // string ticker = "PETR4";
+            // double buyQuote = 20.0;
+            // double sellQuote = 25.0;
 
-        // Console.WriteLine($"Ticker: {ticker}");
-        // Console.WriteLine($"Buy Quote: {buy_quote}");
-        // Console.WriteLine($"Sell Quote: {sell_quote}");
+            var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+            .Build();
+
+            Console.WriteLine($"Quote monitor for ticker {ticker} set up with buy quote {buyQuote} and sell quote {sellQuote}.");
 
 
-        // QuoteMonitor quoteMonitor = new QuoteMonitor(ticker, buy_quote, sell_quote);
-        // double quote = quoteMonitor.SetQuoteAsync().Result;
-        // Console.WriteLine($"Current quote of {ticker}: {quote}");
+            QuoteMonitor quoteMonitor = new QuoteMonitor(ticker, buyQuote, sellQuote, config);
 
-        // var monitorRunTask = quoteMonitor.Run();
+            var monitorRunTask = quoteMonitor.RunAsync();
 
-        // Task.WhenAll(monitorRunTask).Wait(); // change this to A list later
+            await monitorRunTask;
 
-        var email = new Email();
-
-        email.sendEmail();
-
-        return 0;
+            return 0;
+        }
     }
 }
