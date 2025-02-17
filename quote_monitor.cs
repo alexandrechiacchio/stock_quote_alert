@@ -97,7 +97,7 @@ namespace StockQuoteAlert
                 last_quote = cur_quote;
                 await SetQuoteAsync();
                 CheckQuote();
-                await Task.Delay(60000); // larger than 1 second so I dont finish up the API limit
+                await Task.Delay(1000); // larger than 1 second so I dont finish up the API limit
                 // the API free plan is so bad that it only updates every 30 minutes
             }
         }
