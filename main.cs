@@ -16,20 +16,16 @@ namespace StockQuoteAlert
 
             string ticker = args[0];
             double buyQuote, sellQuote;
-            if (!double.TryParse(args[1], out buyQuote) ||  !double.TryParse(args[2], out sellQuote) )
+            if (!double.TryParse(args[1], out buyQuote) || !double.TryParse(args[2], out sellQuote))
             {
                 Console.WriteLine("Please enter a valid numeric value for the quotes.");
                 return 1;
             }
-            if(buyQuote < 0 || sellQuote < buyQuote)
+            if (buyQuote < 0 || sellQuote < buyQuote)
             {
-                Console.WriteLine("Please enter a valid value for the quotes. Buy quote should be greater than 0 and sell quote should be greater than buy quote.");
+                Console.WriteLine("Please enter a valid value for the quotes. Buy quote must be greater than 0 and sell quote greater than buy quote.");
                 return 1;
             }
-
-            // string ticker = "PETR4";
-            // double buyQuote = 20.0;
-            // double sellQuote = 25.0;
 
             var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())

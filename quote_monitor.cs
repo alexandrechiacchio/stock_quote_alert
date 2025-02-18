@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace StockQuoteAlert
 {
-
+    /// <summary>
+    /// Monitors the quote of a given ticker with brapi api and sends an email if the quote reaches certains values
+    /// </summary>
     public class QuoteMonitor
     {
         private readonly string ticker;
@@ -34,13 +36,14 @@ namespace StockQuoteAlert
         ///  Set cur_quote to the current quote for the ticker
         /// </summary>
         /// <returns>Quote value</returns>
-        public async Task<double> SetQuoteAsync()
+        private async Task<double> SetQuoteAsync()
         {
             using (HttpClient client = new HttpClient())
             {
                 var url = $"https://brapi.dev/api/quote/{ticker}";
                 var query = new Dictionary<string, string>
             {
+                // use below as needed
                 // { "range", "1d" },
                 // { "interval", "1m" },
                 // { "fundamental", "false" },
@@ -73,7 +76,7 @@ namespace StockQuoteAlert
             }
         }
 
-        public void CheckQuote()
+        private void CheckQuote()
         {
             if (cur_quote < buy_quote && last_quote > buy_quote)
             {
